@@ -1,6 +1,4 @@
 package com.filmesEmSerieBackEnd.FilmesEmSerieBackEnd.usuario;
 
-import jakarta.validation.constraints.NotBlank;
-
-public record DadosCadastroUsuario(String nome,String senha) {
+public record DadosValidaUsuario(String nome, String senha) {
 }

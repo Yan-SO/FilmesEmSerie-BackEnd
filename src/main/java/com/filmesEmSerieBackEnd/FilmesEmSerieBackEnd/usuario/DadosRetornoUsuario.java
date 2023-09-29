@@ -7,4 +7,7 @@ public record DadosRetornoUsuario(Integer id, String nome, boolean valor) implem
         this(user.getId(),user.getNome_usuario(), valor);
     }
 
+    public DadosRetornoUsuario(Usuario user) {
+        this(user.getId(),user.getNome_usuario(), true);
+    }
 }

@@ -20,7 +20,7 @@ public class Usuario {
     private String nome_usuario;
     private String senha;
 
-    public Usuario(DadosCadastroUsuario dados){
+    public Usuario(DadosValidaUsuario dados){
         this.nome_usuario = dados.nome();
         this.senha = dados.senha();
     }
