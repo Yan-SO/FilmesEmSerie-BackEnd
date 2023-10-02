@@ -9,11 +9,13 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/item")
@@ -26,7 +28,7 @@ public class ItensController {
 
     @PostMapping
     @Transactional
-    public ReturnData cadastrarItem(@RequestBody DadosCadastroItem data){
+    public ReturnData cadastrarItem(@RequestBody DadosValidaItem data){
         if (!data.nullChecks()) return new ReturnMessage("null iten",false);
 
         Optional<Usuario> retorno= usuarioRepository.findById(data.idUsuario());
@@ -45,6 +47,16 @@ public class ItensController {
         return itensRepository.findAll(page).map(DadosRetornoItem::new);
     }
 
+    @GetMapping("tipo")
+    public Page<DadosRetornoItem> buscarPorTipo(@RequestBody @Valid DadosValidaItem data, Pageable page){
+        Optional<Usuario> user = usuarioRepository.findById(data.idUsuario());
+        if (user.isEmpty()) return null;
+        List<DadosRetornoItem> itensFiltrados= user.get().getItens().stream()
+                .filter(item -> item.getTipos() == data.tipo()).toList().stream()
+                .map(DadosRetornoItem::new).toList();
+        return new PageImpl<>(itensFiltrados,page,itensFiltrados.size());
+    }
+
     @GetMapping("/id={id}")
     public ReturnData bustaPorId(@PathVariable Integer id){
         Optional<Item> item = itensRepository.findById(id);
@@ -57,6 +69,7 @@ public class ItensController {
     @PutMapping
     @Transactional
     public ReturnData updateItem(@RequestBody @Valid DadosUpdateItem data){
+        if (!itensRepository.existsById(data.id())) return new ReturnMessage("Iten not find", false);
         var item = itensRepository.getReferenceById(data.id());
         boolean valor = item.update(data);
         if (valor){

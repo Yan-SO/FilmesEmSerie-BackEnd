@@ -1,6 +1,8 @@
 package com.filmesEmSerieBackEnd.FilmesEmSerieBackEnd.itens;
 
-public record DadosCadastroItem(String nomeItem, Tipos tipo, StatusItem status, Float nota, Integer idUsuario) {
+import jakarta.validation.constraints.NotNull;
+
+public record DadosValidaItem(String nomeItem, @NotNull Tipos tipo, StatusItem status, Float nota, @NotNull Integer idUsuario) {
 
     public boolean nullChecks(){
         if (this.nomeItem == null)return false;

@@ -33,7 +33,7 @@ public class Item {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    public Item(DadosCadastroItem data,Usuario user){
+    public Item(DadosValidaItem data, Usuario user){
         this.nomeItem = data.nomeItem();
         this.nota = data.nota();
         this.status = data.status();
