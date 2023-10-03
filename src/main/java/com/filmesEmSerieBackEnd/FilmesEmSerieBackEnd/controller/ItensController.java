@@ -8,14 +8,23 @@ import com.filmesEmSerieBackEnd.FilmesEmSerieBackEnd.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/item")
@@ -43,8 +52,20 @@ public class ItensController {
     }
     @GetMapping("/todos")
     public Page<ReturnData> listarTodos(Pageable page){
-        var a = itensRepository.findAll();
         return itensRepository.findAll(page).map(DadosRetornoItem::new);
+    }
+    @GetMapping("/get-imagem/id={id}")
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id ){
+        Optional<Item> item = itensRepository.findById(id);
+        if (item.isEmpty()) return null;
+        if (item.get().getImagem() == null) return null;
+
+        byte[] imagem = item.get().getImagem();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+
+        return new ResponseEntity<>(imagem, headers, HttpStatus.OK);
+
     }
 
     @GetMapping("tipo")
@@ -60,9 +81,7 @@ public class ItensController {
     @GetMapping("/id={id}")
     public ReturnData bustaPorId(@PathVariable Integer id){
         Optional<Item> item = itensRepository.findById(id);
-        if(item.isEmpty())
-            return new ReturnMessage("Item not find", false);
-
+        if(item.isEmpty()) return new ReturnMessage("Item not find", false);
         return new DadosRetornoItem(item.get(), true);
     }
 
@@ -76,6 +95,29 @@ public class ItensController {
             return new DadosRetornoItem(item, valor);
         }
         return new ReturnMessage("no changes",false);
+    }
+
+    @PutMapping("/imagem/add-{user}")
+    @Transactional
+    public ReturnData addImage(@RequestBody MultipartFile file, @PathVariable Integer user){
+        try {
+            Item item = null;
+            if (file == null || user == null)
+                return new ReturnMessage("image or user not sent", false);
+            String fileName = file.getOriginalFilename();
+            if (fileName != null){
+                if (fileName.toLowerCase().endsWith(".png")) {
+                    item = itensRepository.getReferenceById(user);
+                    item.setImagem(file.getBytes());
+                    return new ReturnMessage("saved image", true);
+                }
+                return new ReturnMessage("wrong image type", false);
+            }
+            return new ReturnMessage("wrong file type", false);
+        }catch (IOException e){
+            return new ReturnMessage("image not saved",false);
+        }
+
     }
 
     @DeleteMapping("id={id}")

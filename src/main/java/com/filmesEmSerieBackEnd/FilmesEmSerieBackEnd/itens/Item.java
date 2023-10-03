@@ -33,12 +33,19 @@ public class Item {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    @Lob
+    private byte[] imagem;
+
     public Item(DadosValidaItem data, Usuario user){
         this.nomeItem = data.nomeItem();
         this.nota = data.nota();
         this.status = data.status();
         this.tipos = data.tipo();
         this.usuario = user;
+    }
+
+    public void setImagem(byte[] imagem) {
+        this.imagem = imagem;
     }
 
     public boolean update(DadosUpdateItem date){
