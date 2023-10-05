@@ -45,7 +45,7 @@ public class UsuarioController {
     public Page<ReturnData> listar(Pageable page){
         return repository.findAll(page).map(DadosRetornoUsuario::new);
     }
-    @GetMapping("/login")
+    @PutMapping("/login")
     public ReturnData valicarLogin(@RequestBody DadosValidaUsuario data){
         List<Usuario> retorno = null;
         if (data.nome() != null ) retorno = repository.findUsuariosByNomeUsuario(data.nome());
