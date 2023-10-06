@@ -68,7 +68,7 @@ public class ItensController {
 
     }
 
-    @GetMapping("tipo")
+    @PutMapping("tipo")
     public Page<DadosRetornoItem> buscarPorTipo(@RequestBody @Valid DadosValidaItem data, Pageable page){
         Optional<Usuario> user = usuarioRepository.findById(data.idUsuario());
         if (user.isEmpty()) return null;
@@ -97,18 +97,20 @@ public class ItensController {
         return new ReturnMessage("no changes",false);
     }
 
-    @PutMapping("/imagem/add-{user}")
+    @PostMapping("/imagem/add-{idItem}")
     @Transactional
-    public ReturnData addImage(@RequestBody MultipartFile file, @PathVariable Integer user){
+    public ReturnData addImage(@RequestPart MultipartFile image, @PathVariable Integer idItem){
         try {
             Item item = null;
-            if (file == null || user == null)
-                return new ReturnMessage("image or user not sent", false);
-            String fileName = file.getOriginalFilename();
+            if (image == null)
+                return new ReturnMessage("image not sent", false);
+            if (idItem == null)
+                return new ReturnMessage("id item not sent", false);
+            String fileName = image.getOriginalFilename();
             if (fileName != null){
                 if (fileName.toLowerCase().endsWith(".png")) {
-                    item = itensRepository.getReferenceById(user);
-                    item.setImagem(file.getBytes());
+                    item = itensRepository.getReferenceById(idItem);
+                    item.setImagem(image.getBytes());
                     return new ReturnMessage("saved image", true);
                 }
                 return new ReturnMessage("wrong image type", false);
