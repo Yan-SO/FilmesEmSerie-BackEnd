@@ -69,13 +69,15 @@ public class ItensController {
     }
 
     @PutMapping("tipo")
-    public Page<DadosRetornoItem> buscarPorTipo(@RequestBody @Valid DadosValidaItem data, Pageable page){
+    public Page<DadosRetornoItem> buscarPorUsuarioETipo(@RequestBody @Valid DadosValidaItem data, Pageable page){
         Optional<Usuario> user = usuarioRepository.findById(data.idUsuario());
         if (user.isEmpty()) return null;
         List<DadosRetornoItem> itensFiltrados= user.get().getItens().stream()
                 .filter(item -> item.getTipos() == data.tipo()).toList().stream()
                 .map(DadosRetornoItem::new).toList();
-        return new PageImpl<>(itensFiltrados,page,itensFiltrados.size());
+        int start = (int)page.getOffset();
+        int end = Math.min((start + page.getPageSize()), itensFiltrados.size());
+        return new PageImpl<>(itensFiltrados.subList(start, end), page, itensFiltrados.size());
     }
 
     @GetMapping("/id={id}")
@@ -124,7 +126,7 @@ public class ItensController {
 
     @DeleteMapping("id={id}")
     @Transactional
-    public ReturnData deletarUsuario(@PathVariable Integer id){
+    public ReturnData deletarItem(@PathVariable Integer id){
         itensRepository.deleteById(id);
         return new ReturnMessage("deleted Item",true);
     }
